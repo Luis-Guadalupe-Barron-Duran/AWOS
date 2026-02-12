@@ -42,7 +42,17 @@ const poblarProductos = async (request, response) => {
         response.status(500).json({error: error.message})
     }
 };
-
+const obtenerp=async (req, res) =>{
+try{
+    const {nombre} = req.params;
+        const query= `SELECT * FROM productos WHERE nombre ILIKE $1`
+        const { rows } = await pool.query(query, [`%${nombre}%`]);
+        res.json(rows);
+    } catch(error){
+        console.error(error);
+        res.status(500).json({ error: 'Error al leer bd' });
+    }
+};
 const obtenerc=async (req, res) =>{
 try{
     const {nombre} = req.params;
@@ -55,4 +65,4 @@ try{
     }
 };
 
-module.exports = { poblarProductos, obtenerc };
+module.exports = { poblarProductos, obtenerc, obtenerp };

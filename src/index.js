@@ -8,8 +8,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/api/productos/', router);
-app.use('/api/categoria/', router);
+app.use('/api', router);
+
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log("Servicio arriba"));
