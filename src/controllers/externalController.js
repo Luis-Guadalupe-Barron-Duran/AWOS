@@ -45,7 +45,9 @@ const poblarProductos = async (request, response) => {
 
 const obtenerc=async (req, res) =>{
 try{
-        const { rows } = await pool.query('SELECT * FROM categoria');
+    const {nombre} = req.params;
+        const query= `SELECT * FROM categoria WHERE nombre ILIKE $1`
+        const { rows } = await pool.query(query, [`%${nombre}%`]);
         res.json(rows);
     } catch(error){
         console.error(error);
@@ -53,4 +55,4 @@ try{
     }
 };
 
-module.exports = { poblarProductos, obtenerc, obtenerp };
+module.exports = { poblarProductos, obtenerc };
