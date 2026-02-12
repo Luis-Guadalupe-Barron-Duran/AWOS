@@ -45,7 +45,11 @@ const poblarProductos = async (request, response) => {
 const obtenerp=async (req, res) =>{
 try{
     const {nombre} = req.params;
-        const query= `SELECT * FROM productos WHERE nombre ILIKE $1`
+        const query= `SELECT p.*, c.nombre AS categoria_nombre
+            FROM productos p
+            INNER JOIN categoria c ON p.id_categoria = c.id
+            WHERE p.nombre ILIKE $1
+        `
         const { rows } = await pool.query(query, [`%${nombre}%`]);
         res.json(rows);
     } catch(error){
