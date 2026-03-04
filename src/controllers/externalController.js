@@ -103,5 +103,21 @@ const obtenerProductos = async (req, res) => {
     res.status(500).json({ error: 'Error al leer bd' });
   }
 };
+const crearProducto= async (req,res) =>{
+    const  nombre =req.body.nombre;
+    const precio = req.body.precio;
+    const stock = req.body.stock;
+    const descripcion= req.body.descripcion;
+    const imagen_url = req.body.imagen_url;
+    try {
+        const query= `INSERT INTO productos(nombre, precio, stock, descripcion, imagen_url) VALUES ($1, $2, $3, $4, $5)`;
+        if(descripcion)
+        await pool.query(query, [nombre, precio, stock, descripcion, imagen_url]);
+        res.status(201).json({ msj: "Producto creado exitosamente" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al crear producto' });
+    }
+}
 
-module.exports = { poblarProductos, obtenerc, obtenerp, buscarProductos, obtenerProductos };
+module.exports = { poblarProductos, obtenerc, obtenerp, buscarProductos, obtenerProductos, crearProducto };
