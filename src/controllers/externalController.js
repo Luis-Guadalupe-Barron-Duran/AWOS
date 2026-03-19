@@ -91,11 +91,7 @@ const buscarProductos = async (req, res) => {
 const obtenerProductos = async (req, res) => {
   try {
     const query = `
-      SELECT p.*, c.nombre AS categoria_nombre
-      FROM productos p
-      INNER JOIN categoria c ON p.id_categoria = c.id
-      ORDER BY p.id DESC
-    `;
+      SELECT * from productos`;
     const { rows } = await pool.query(query);
     res.json(rows);
   } catch (error) {
