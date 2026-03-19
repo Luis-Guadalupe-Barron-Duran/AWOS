@@ -109,15 +109,19 @@ const crearProducto= async (req,res) =>{
     const stock = req.body.stock;
     const descripcion= req.body.descripcion;
     const imagen_url = req.body.imagen_url;
+    const id_categoria = req.body.id_categoria;
+    const youtube_id = req.body.youtube_id;
     try {
-        const query= `INSERT INTO productos(nombre, precio, stock, descripcion, imagen_url) VALUES ($1, $2, $3, $4, $5)`;
+        const query= `INSERT INTO productos(nombre, precio, stock, descripcion, imagen_url, id_categoria, youtube_id) VALUES ($1, $2, $3, $4, $5, $6, $7)`;
         if(descripcion)
-        await pool.query(query, [nombre, precio, stock, descripcion, imagen_url]);
+        await pool.query(query, [nombre, precio, stock, descripcion, imagen_url, id_categoria, youtube_id]);
         res.status(201).json({ msj: "Producto creado exitosamente" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error al crear producto' });
     }
-}
+};
+
+
 
 module.exports = { poblarProductos, obtenerc, obtenerp, buscarProductos, obtenerProductos, crearProducto };
