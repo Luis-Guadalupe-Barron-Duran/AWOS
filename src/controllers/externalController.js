@@ -45,7 +45,18 @@ const poblarProductos = async (request, response) => {
 const obtenerp=async (req, res) =>{
 try{
     const {nombre} = req.params;
-        const query= `SELECT p.*, c.nombre AS categoria_nombre
+        const query= `SELECT 
+            p.id,
+            p.nombre,
+            p.precio,
+            p.stock,
+            p.descripcion,
+            p.imagen_url,
+            p.id_categoria,
+            p.youtube_id,
+            p.latitud,
+            p.longitud,
+            c.nombre AS categoria_nombre
             FROM productos p
             INNER JOIN categoria c ON p.id_categoria = c.id
             WHERE p.nombre ILIKE $1
@@ -77,7 +88,18 @@ const buscarProductos = async (req, res) => {
                  error: 'No se envio ningun parametro' 
                 });
         }
-        const query = `SELECT p.*, c.nombre AS categoria_nombre
+        const query = `SELECT 
+            p.id,
+            p.nombre,
+            p.precio,
+            p.stock,
+            p.descripcion,
+            p.imagen_url,
+            p.id_categoria,
+            p.youtube_id,
+            p.latitud,
+            p.longitud,
+            c.nombre AS categoria_nombre
             FROM productos p INNER JOIN categoria c ON p.id_categoria = c.id
             WHERE p.nombre ILIKE $1 OR p.descripcion ILIKE $1`;
 
@@ -91,7 +113,18 @@ const buscarProductos = async (req, res) => {
 const obtenerProductos = async (req, res) => {
   try {
     const query = `
-      SELECT * from productos`;
+            SELECT 
+                id,
+                nombre,
+                precio,
+                stock,
+                descripcion,
+                imagen_url,
+                id_categoria,
+                youtube_id,
+                latitud,
+                longitud
+            FROM productos`;
     const { rows } = await pool.query(query);
     res.json(rows);
   } catch (error) {
@@ -107,10 +140,12 @@ const crearProducto= async (req,res) =>{
     const imagen_url = req.body.imagen_url;
     const id_categoria = req.body.id_categoria;
     const youtube_id = req.body.youtube_id;
+    const latitud= req.body.latitud;
+    const longitud= req.body.longitud;
     try {
-        const query= `INSERT INTO productos(nombre, precio, stock, descripcion, imagen_url, id_categoria, youtube_id) VALUES ($1, $2, $3, $4, $5, $6, $7)`;
+        const query= `INSERT INTO productos(nombre, precio, stock, descripcion, imagen_url, id_categoria, youtube_id, latitud, longitud) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
         if(descripcion)
-        await pool.query(query, [nombre, precio, stock, descripcion, imagen_url, id_categoria, youtube_id]);
+        await pool.query(query, [nombre, precio, stock, descripcion, imagen_url, id_categoria, youtube_id, latitud, longitud]);
         res.status(201).json({ msj: "Producto creado exitosamente" });
     } catch (error) {
         console.error(error);
