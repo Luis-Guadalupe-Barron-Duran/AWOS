@@ -1,5 +1,31 @@
 const pool = require('../config/db');
 
+const validarDatosProducto = ({ nombre, precio, stock, latitud, longitud }) => {
+    if (typeof nombre !== 'string' || !nombre.trim() || precio === undefined || stock === undefined) {
+        return 'Nombre, precio y stock son obligatorios';
+    }
+
+    const precioNumero = Number(precio);
+    const stockNumero = Number(stock);
+    const latitudNumero = latitud === null || latitud === undefined || latitud === '' ? null : Number(latitud);
+    const longitudNumero = longitud === null || longitud === undefined || longitud === '' ? null : Number(longitud);
+
+    if (!Number.isFinite(precioNumero) || precioNumero < 0 || precioNumero > 99999999.99) {
+        return 'El precio debe ser un número entre 0 y 99999999.99';
+    }
+    if (!Number.isInteger(stockNumero) || stockNumero < 0) {
+        return 'El stock debe ser un número entero mayor o igual a 0';
+    }
+    if (latitudNumero !== null && (!Number.isFinite(latitudNumero) || latitudNumero < -90 || latitudNumero > 90)) {
+        return 'La latitud debe estar entre -90 y 90';
+    }
+    if (longitudNumero !== null && (!Number.isFinite(longitudNumero) || longitudNumero < -180 || longitudNumero > 180)) {
+        return 'La longitud debe estar entre -180 y 180';
+    }
+
+    return null;
+};
+
 const poblarProductos = async (request, response) => {
     try {
         // Fetch FakeStoreApi
@@ -133,19 +159,19 @@ const obtenerProductos = async (req, res) => {
   }
 };
 const crearProducto= async (req,res) =>{
-    const  nombre =req.body.nombre;
-    const precio = req.body.precio;
-    const stock = req.body.stock;
-    const descripcion= req.body.descripcion;
-    const imagen_url = req.body.imagen_url;
-    const id_categoria = req.body.id_categoria;
-    const youtube_id = req.body.youtube_id;
-    const latitud= req.body.latitud;
-    const longitud= req.body.longitud;
+    const { nombre, precio, stock, descripcion, imagen_url, id_categoria, youtube_id, latitud, longitud } = req.body;
+    const errorValidacion = validarDatosProducto(req.body);
+    if (errorValidacion) {
+        return res.status(400).json({ error: errorValidacion });
+    }
+
     try {
         const query= `INSERT INTO productos(nombre, precio, stock, descripcion, imagen_url, id_categoria, youtube_id, latitud, longitud) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
-        if(descripcion)
-        await pool.query(query, [nombre, precio, stock, descripcion, imagen_url, id_categoria, youtube_id, latitud, longitud]);
+        await pool.query(query, [
+            nombre.trim(), Number(precio), Number(stock), descripcion || null,
+            imagen_url || null, id_categoria || null, youtube_id || null,
+            latitud === '' ? null : latitud, longitud === '' ? null : longitud
+        ]);
         res.status(201).json({ msj: "Producto creado exitosamente" });
     } catch (error) {
         console.error(error);
@@ -153,6 +179,38 @@ const crearProducto= async (req,res) =>{
     }
 };
 
+const actualizarProducto = async (req, res) => {
+    const { id } = req.params;
+    const { nombre, precio, stock, descripcion, imagen_url, id_categoria, youtube_id, latitud, longitud } = req.body;
+    const errorValidacion = validarDatosProducto(req.body);
+    if (errorValidacion) {
+        return res.status(400).json({ error: errorValidacion });
+    }
+
+    try {
+        const query = `
+            UPDATE productos
+            SET nombre = $1, precio = $2, stock = $3, descripcion = $4,
+                imagen_url = $5, id_categoria = $6, youtube_id = $7,
+                latitud = $8, longitud = $9
+            WHERE id = $10
+            RETURNING id, nombre, precio, stock, descripcion, imagen_url,
+                      id_categoria, youtube_id, latitud, longitud
+        `;
+        const { rows } = await pool.query(query, [
+            nombre.trim(), Number(precio), Number(stock), descripcion || null,
+            imagen_url || null, id_categoria || null, youtube_id || null,
+            latitud === '' ? null : latitud, longitud === '' ? null : longitud, id
+        ]);
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Producto no encontrado' });
+        }
+        res.json(rows[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al actualizar producto' });
+    }
+};
 
 
-module.exports = { poblarProductos, obtenerc, obtenerp, buscarProductos, obtenerProductos, crearProducto };
+module.exports = { poblarProductos, obtenerc, obtenerp, buscarProductos, obtenerProductos, crearProducto, actualizarProducto };
